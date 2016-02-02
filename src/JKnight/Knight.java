@@ -1,7 +1,10 @@
+package JKnight;
+
 /**
  * Created by KarlK.
  */
 public class Knight {
+
     private int i_posX = 0,i_posY = 0;
 
     public void setX(int i_posX) {
@@ -13,11 +16,11 @@ public class Knight {
     }
 
     public int getX() {
-        return i_posX;
+        return this.i_posX;
     }
 
     public int getY() {
-        return i_posY;
+        return this.i_posY;
     }
 
     public void Jump(){}
