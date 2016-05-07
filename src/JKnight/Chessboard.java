@@ -3,12 +3,12 @@ package JKnight;
 /**
  * Created by KarlK.
  */
-public class Chessboard {
+public class Chessboard{
 
-    public boolean[][] bBoard;
+    public boolean[][] Field;
 
-    Chessboard(int[]aBoardDimension) {
-        this.bBoard = new boolean[aBoardDimension[0]][aBoardDimension[1]];
+    Chessboard(int[] BoardDimension) {
+        this.Field = new boolean[BoardDimension[0]][BoardDimension[1]];
     }
 
 }

@@ -1,27 +1,43 @@
 package JKnight;
 
+import java.util.Random;
+
 /**
  * Created by KarlK.
  */
-public class Knight {
+public abstract class Knight {
 
-    private int i_posX = 0,i_posY = 0;
+    protected Random NumberGenerator = new Random();
 
-    public void setX(int i_posX) {
-        this.i_posX = i_posX;
+    protected int positionX = 0, positionY = 0;
+
+    protected final int[] rangeX = {  3,  2, -2, -3, -3, -2,  2, -2};
+    protected final int[] rangeY = {  2,  3,  3,  2, -2, -3, -3,  3};
+
+    public void setX(int positionX) {
+        this.positionX = positionX;
     }
 
-    public void setY(int i_posY) {
-        this.i_posY = i_posY;
+    public void setY(int positionY) {
+        this.positionY = positionY;
     }
 
     public int getX() {
-        return this.i_posX;
+        return this.positionX;
     }
 
     public int getY() {
-        return this.i_posY;
+        return this.positionY;
     }
 
-    public void Jump(){}
+    public void Solve() {
+    }
+
+    protected void Jump() {
+    }
+
+    protected boolean isBetween(int value, int min, int max)
+    {
+        return((value > min) && (value < max));
+    }
 }
