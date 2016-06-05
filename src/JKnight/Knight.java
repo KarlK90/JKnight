@@ -1,42 +1,22 @@
 package JKnight;
 
-import java.util.Random;
-
 /**
  * Created by KarlK.
  */
 public abstract class Knight {
 
-    protected Random NumberGenerator = new Random();
+    protected static final int UNVISITED = 0;
+    protected static final int VISITED = 1;
+    protected static final int VALID = 2;
+    protected static final int INVALID = 20;
+    protected static final int DEADEND = -1;
 
-    protected int positionX = 0, positionY = 0;
+    protected final int[][] jumpMatrix = {{  2,  1, -1, -2, -2, -1,  1, 2},{  1,  2,  2,  1, -1, -2, -2,  -1}};
 
-    protected final int[] rangeX = {  3,  2, -2, -3, -3, -2,  2, -2};
-    protected final int[] rangeY = {  2,  3,  3,  2, -2, -3, -3,  3};
+    public abstract void Solve();
+    protected abstract void nextJump();
 
-    public void setX(int positionX) {
-        this.positionX = positionX;
-    }
-
-    public void setY(int positionY) {
-        this.positionY = positionY;
-    }
-
-    public int getX() {
-        return this.positionX;
-    }
-
-    public int getY() {
-        return this.positionY;
-    }
-
-    public void Solve() {
-    }
-
-    protected void Jump() {
-    }
-
-    protected boolean isBetween(int value, int min, int max)
+    protected static boolean isBetween(int value, int min, int max)
     {
         return((value > min) && (value < max));
     }
