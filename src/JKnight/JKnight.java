@@ -1,16 +1,36 @@
 package JKnight;
 
+import java.util.Random;
+
 public class JKnight {
 
     public static void main(String[] args) {
-        int[] BoardDimension = {8, 8};
-        int[] StartPosition = {7, 7};
+        int[] boardDimension = {8, 8};
+        int[] startPosition = {0, 0};
+        Random generator = new Random();
 
-        BacktrackKnight Knight = new BacktrackKnight(BoardDimension, StartPosition);
+        BacktrackKnight knight = new BacktrackKnight(boardDimension, startPosition);
+        BacktrackKnightRandom knightRandom = new BacktrackKnightRandom(boardDimension, startPosition);
 
-        System.out.println("Alles Initialisiert!");
+        Thread knightThread = new Thread(knight);
+        Thread knightRandomThread = new Thread(knightRandom);
 
-        Knight.Solve();
+        knightThread.start();
+        knightRandomThread.start();
 
+        while (true) {
+            if (!knightRandomThread.isAlive()) {
+                int[] start = {generator.nextInt(boardDimension[0]), generator.nextInt(boardDimension[1])};
+                knightRandom.reset(start);
+                knightRandomThread = new Thread(knightRandom);
+                knightRandomThread.start();
+            }
+            if (!knightThread.isAlive()) {
+                int[] start = {generator.nextInt(boardDimension[0]), generator.nextInt(boardDimension[1])};
+                knight.reset(start);
+                knightThread = new Thread(knight);
+                knightThread.start();
+            }
+        }
     }
 }
