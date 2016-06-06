@@ -3,25 +3,21 @@ package JKnight;
 /**
  * Created by KarlK.
  */
-public class Knight {
+public abstract class Knight {
 
-    private int i_posX = 0,i_posY = 0;
+    protected static final int UNVISITED = 0;
+    protected static final int VISITED = 1;
+    protected static final int VALID = 2;
+    protected static final int INVALID = 20;
+    protected static final int DEADEND = -1;
 
-    public void setX(int i_posX) {
-        this.i_posX = i_posX;
+    protected final int[][] jumpMatrix = {{  2,  1, -1, -2, -2, -1,  1, 2},{  1,  2,  2,  1, -1, -2, -2,  -1}};
+
+    public abstract void Solve();
+    protected abstract void nextJump();
+
+    protected static boolean isBetween(int value, int min, int max)
+    {
+        return((value > min) && (value < max));
     }
-
-    public void setY(int i_posY) {
-        this.i_posY = i_posY;
-    }
-
-    public int getX() {
-        return this.i_posX;
-    }
-
-    public int getY() {
-        return this.i_posY;
-    }
-
-    public void Jump(){}
 }
