@@ -1,4 +1,4 @@
-package JKnight;
+package KarlK90.JKnight;
 
 public abstract class BaseKnight implements Runnable {
 
@@ -26,7 +26,11 @@ public abstract class BaseKnight implements Runnable {
 
     protected abstract String getMethod();
 
-    protected static boolean isBetween(int value, int min, int max) {
+    protected final boolean isBetween(int value, int min, int max) {
         return ((value > min) && (value < max));
+    }
+
+    protected final boolean isLegalJump(int[] jump, int[][]board){
+        return isBetween(jump[0], -1, board[0].length) && isBetween(jump[1], -1, board[1].length) && board[jump[0]][jump[1]] == UNVISITED;
     }
 }

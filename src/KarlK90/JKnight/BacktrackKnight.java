@@ -1,4 +1,4 @@
-package JKnight;
+package KarlK90.JKnight;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -22,7 +22,7 @@ public class BacktrackKnight extends BaseKnight {
     protected Random generator = new Random();
     protected BoardStopWatch watch = new BoardStopWatch();
 
-
+    @Override
     protected String getMethod(){
         return this.METHOD;
     }
@@ -75,7 +75,7 @@ public class BacktrackKnight extends BaseKnight {
         nextJump[0] = path[jump][0] + jumpMatrix[0][number];
         nextJump[1] = path[jump][1] + jumpMatrix[1][number];
 
-        if ((isBetween(nextJump[0], -1, boardDimension[0]) && isBetween(nextJump[1], -1, boardDimension[1])) && chessboard[nextJump[0]][nextJump[1]] == UNVISITED) {
+        if (isLegalJump(nextJump,chessboard)) {
             return VALID;
         } else {
             return INVALID;

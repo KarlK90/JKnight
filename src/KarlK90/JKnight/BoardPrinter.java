@@ -1,4 +1,4 @@
-package JKnight;
+package KarlK90.JKnight;
 
 public class BoardPrinter {
 
