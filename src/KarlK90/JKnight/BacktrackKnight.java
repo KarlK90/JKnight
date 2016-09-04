@@ -55,9 +55,9 @@ public class BacktrackKnight extends BaseKnight {
             }
             watch.stop();
             printResult();
-        } catch (Exception e) {
+        } catch (NoSolutionException e) {
             watch.stop();
-            printNoResult(); //TODO: Maybe too confident that there won't be other exceptions...
+            printNoResult();
         }
     }
 
@@ -89,10 +89,10 @@ public class BacktrackKnight extends BaseKnight {
         return true;
     }
 
-    protected void jumpBack() throws Exception {
+    protected void jumpBack() throws NoSolutionException {
         chessboard[path[jump][0]][path[jump][1]] = UNVISITED;
 
-        if (--jump < 0) throw new Exception();
+        if (--jump < 0) throw new NoSolutionException();
 
         for (int i = 0; i < 8; i++) {
             if (path[jump][i + OFFSET] == VISITED) {
@@ -118,7 +118,7 @@ public class BacktrackKnight extends BaseKnight {
         }
     }
 
-    protected void nextJump() throws Exception {
+    protected void nextJump() throws NoSolutionException {
         for (int i = 0; i < 8; i++) {
             int temp = checkNextJump(i);
             if (temp == VALID && path[jump][i + OFFSET] != DEADEND) {

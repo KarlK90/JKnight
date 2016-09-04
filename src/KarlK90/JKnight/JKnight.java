@@ -6,7 +6,7 @@ public class JKnight {
 
     public static void main(String[] args) {
         int[] boardDimension = {8, 8};
-        int[] startPosition = {4, 4};
+        int[] startPosition = {0, 0};
         Random generator = new Random();
 
         BacktrackKnight knight = new BacktrackKnight(boardDimension, startPosition);
@@ -23,14 +23,12 @@ public class JKnight {
 
         while (true) {
             if (!knightRandomThread.isAlive()) {
-                int[] start = {generator.nextInt(boardDimension[0]), generator.nextInt(boardDimension[1])};
-                knightRandom.reset(start);
+                knightRandom.reset(new int[]{generator.nextInt(boardDimension[0]), generator.nextInt(boardDimension[1])});
                 knightRandomThread = new Thread(knightRandom);
                 knightRandomThread.start();
             }
             if (!knightThread.isAlive()) {
-                int[] start = {generator.nextInt(boardDimension[0]), generator.nextInt(boardDimension[1])};
-                knight.reset(start);
+                knight.reset(new int[]{generator.nextInt(boardDimension[0]), generator.nextInt(boardDimension[1])});
                 knightThread = new Thread(knight);
                 knightThread.start();
             }

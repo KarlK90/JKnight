@@ -1,8 +1,7 @@
 package KarlK90.JKnight;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
-
 
 public class WarnsdorfKnight extends BacktrackKnight{
     WarnsdorfKnight(int[] boardDimension, int[] startPosition) {
@@ -20,7 +19,10 @@ public class WarnsdorfKnight extends BacktrackKnight{
     }
 
     @Override
-    protected void nextJump(){
+    protected void nextJump() throws NoSolutionException{
+        int smallestCount = 0;
+        ArrayList<Integer[]> jumpList = new ArrayList<>();
+
         for (int i = 0; i < 8; i++){
             path[jump][i + OFFSET][0] = i;
             int[] nextJump = new int[] {
@@ -38,9 +40,28 @@ public class WarnsdorfKnight extends BacktrackKnight{
 
         for (int i = 0; i < 8; i++){
             if (path[jump][i + OFFSET][1] > 0){
-                jumpForward(path[jump][i + OFFSET][0]);
+                smallestCount = path[jump][i + OFFSET][1];
                 break;
             }
+        }
+
+        if (smallestCount == 0){
+             throw new NoSolutionException();
+        }
+
+        for (int i = 0; i < 8; i++){
+            if (path[jump][i + OFFSET][1] == smallestCount){
+                Integer[] smallJump = new Integer[2];
+                smallJump[0]= path[jump][i + OFFSET][0];
+                smallJump[1]= path[jump][i + OFFSET][1];
+                jumpList.add(smallJump);
+            }
+        }
+
+        if (jumpList.size() == 1){
+            jumpForward(jumpList.get(0)[0]);
+        }else{
+            jumpForward(jumpList.get(generator.nextInt(jumpList.size()))[0]);
         }
     }
 
@@ -59,10 +80,10 @@ public class WarnsdorfKnight extends BacktrackKnight{
     }
 
     protected void jumpForward(int jumpMatrixIndex){
-                jump++;
-                path[jump][0][0] = path[jump - 1][0][0] + jumpMatrix[0][jumpMatrixIndex];
-                path[jump][0][1] = path[jump - 1][0][1] + jumpMatrix[1][jumpMatrixIndex];
-                chessboard[path[jump][0][0]][path[jump][0][1]] = jump;
+        jump++;
+        path[jump][0][0] = path[jump - 1][0][0] + jumpMatrix[0][jumpMatrixIndex];
+        path[jump][0][1] = path[jump - 1][0][1] + jumpMatrix[1][jumpMatrixIndex];
+        chessboard[path[jump][0][0]][path[jump][0][1]] = jump;
     }
 
     @Override
@@ -74,8 +95,22 @@ public class WarnsdorfKnight extends BacktrackKnight{
         path = new int[fieldCount][9][2];
         path[jump][0][0] = startPosition[0];
         path[jump][0][1] = startPosition[1];
-        chessboard[startPosition[0]][startPosition[1]] = 0;
+        chessboard[startPosition[0]][startPosition[1]] = jump;
         watch.reset();
         printer.setup(getMethod(),startPosition,boardDimension,watch);
+    }
+
+    @Override
+    public void solve() {
+            watch.start();
+            while (jump != fieldCount - 1) {
+                try {
+                nextJump();
+                } catch (NoSolutionException e) {
+                    reset(path[jump][0]);
+                }
+            }
+            watch.stop();
+            printResult();
     }
 }
