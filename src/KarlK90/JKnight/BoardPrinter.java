@@ -1,5 +1,7 @@
 package KarlK90.JKnight;
 
+import java.util.Arrays;
+
 public class BoardPrinter {
 
     public static final String ANSI_RESET = "\u001B[0m";
@@ -14,15 +16,14 @@ public class BoardPrinter {
 
     private static final int THRESHOLD = 10000; // Threshold for switching from ms to s
 
-    BoardPrinter(String method, int[] startPosition, int[] boardDimension, BoardStopWatch watch) {
+    public BoardPrinter(String method, int[] startPosition, int[] boardDimension, BoardStopWatch watch) {
         setup(method, startPosition, boardDimension, watch);
     }
 
-    String method;
+    String method, message, columnString;
     int[] startPosition;
     int[] boardDimension;
     BoardStopWatch watch;
-    String message;
 
     public void print(BoardPrinter printer) {
         System.out.println(printer.message + "\n");
@@ -44,6 +45,7 @@ public class BoardPrinter {
         this.startPosition = startPosition;
         this.watch = watch;
         this.boardDimension = boardDimension;
+        this.columnString = CalculateColumnString(boardDimension[0]*boardDimension[1]);
     }
 
     private BoardPrinter runtime() {
@@ -53,12 +55,18 @@ public class BoardPrinter {
         return this;
     }
 
+    private String CalculateColumnString(int fieldCount){
+            char[] array = new char[String.valueOf(fieldCount).length()];
+            Arrays.fill(array, ' ');
+            return new String(array);
+    }
+
     private void printBoard(int[][] board) {
         System.out.print(ANSI_PURPLE);
         for (int[] row : board) {
             for (int column : row) {
                 String out = String.valueOf(column);
-                System.out.print("  ".substring(out.length()) + out + " ");
+                System.out.print(columnString.substring(out.length()) + out + " ");
             }
             System.out.println();
         }

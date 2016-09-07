@@ -1,21 +1,22 @@
 package KarlK90.JKnight;
 
+import KarlK90.JKnight.Knights.BacktrackKnight;
+import KarlK90.JKnight.Knights.BacktrackKnightRandom;
+import KarlK90.JKnight.Knights.KnightBuilder;
+import KarlK90.JKnight.Knights.WarnsdorfKnight;
+
 import java.util.Random;
 
 public class JKnight {
 
     public static void main(String[] args) {
-        int[] boardDimension = {8, 8};
+        int[] boardDimension = {32, 32};
         int[] startPosition = {0, 0};
         Random generator = new Random();
 
-        BacktrackKnight knight = new BacktrackKnight(boardDimension, startPosition);
-        BacktrackKnightRandom knightRandom = new BacktrackKnightRandom(boardDimension, startPosition);
-        WarnsdorfKnight knightWarnsdorf = new WarnsdorfKnight(boardDimension, startPosition);
-
-        Thread knightThread = new Thread(knight);
-        Thread knightRandomThread = new Thread(knightRandom);
-        Thread knightWarnsdorfThread = new Thread(knightWarnsdorf);
+        Thread knightThread = KnightBuilder.getThreaded(new BacktrackKnight(boardDimension, startPosition));
+        Thread knightRandomThread = KnightBuilder.getThreaded(new BacktrackKnightRandom(boardDimension, startPosition));
+        Thread knightWarnsdorfThread = KnightBuilder.getThreaded(new WarnsdorfKnight(boardDimension, startPosition));
 
         knightThread.start();
         knightRandomThread.start();
@@ -23,20 +24,28 @@ public class JKnight {
 
         while (true) {
             if (!knightRandomThread.isAlive()) {
-                knightRandom.reset(new int[]{generator.nextInt(boardDimension[0]), generator.nextInt(boardDimension[1])});
-                knightRandomThread = new Thread(knightRandom);
+                knightRandomThread = KnightBuilder.getThreaded(
+                        new BacktrackKnightRandom(boardDimension,
+                        new int[]{generator.nextInt(boardDimension[0]), generator.nextInt(boardDimension[1])}
+                        ));
                 knightRandomThread.start();
             }
             if (!knightThread.isAlive()) {
-                knight.reset(new int[]{generator.nextInt(boardDimension[0]), generator.nextInt(boardDimension[1])});
-                knightThread = new Thread(knight);
+                knightThread = KnightBuilder.getThreaded(
+                        new BacktrackKnight(boardDimension,
+                                new int[]{generator.nextInt(boardDimension[0]), generator.nextInt(boardDimension[1])}
+                        ));
                 knightThread.start();
             }
             if (!knightWarnsdorfThread.isAlive()) {
-                knightWarnsdorf.reset( new int[]{generator.nextInt(boardDimension[0]), generator.nextInt(boardDimension[1])});
-                knightWarnsdorfThread = new Thread(knightWarnsdorf);
+                knightWarnsdorfThread = KnightBuilder.getThreaded(
+                        new WarnsdorfKnight(boardDimension,
+                                new int[]{generator.nextInt(boardDimension[0]), generator.nextInt(boardDimension[1])}
+                        ));
                 knightWarnsdorfThread.start();
             }
         }
     }
+
+
 }

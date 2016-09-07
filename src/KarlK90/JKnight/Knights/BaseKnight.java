@@ -1,4 +1,4 @@
-package KarlK90.JKnight;
+package KarlK90.JKnight.Knights;
 
 public abstract class BaseKnight implements Runnable {
 
@@ -17,6 +17,8 @@ public abstract class BaseKnight implements Runnable {
     }
 
     protected final int[][] jumpMatrix = {{2, 1, -1, -2, -2, -1, 1, 2}, {1, 2, 2, 1, -1, -2, -2, -1}};
+
+    abstract public void run();
 
     public abstract void solve();
 

@@ -1,4 +1,8 @@
-package KarlK90.JKnight;
+package KarlK90.JKnight.Knights;
+
+import KarlK90.JKnight.BoardPrinter;
+import KarlK90.JKnight.BoardStopWatch;
+import KarlK90.JKnight.NoSolutionException;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -6,7 +10,7 @@ import java.util.Random;
 
 public class BacktrackKnight extends BaseKnight {
 
-    BacktrackKnight(int[] boardDimension, int[] startPosition) {
+    public BacktrackKnight(int[] boardDimension, int[] startPosition) {
         setup(boardDimension, startPosition);
     }
 

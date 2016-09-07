@@ -1,8 +1,8 @@
-package KarlK90.JKnight;
+package KarlK90.JKnight.Knights;
 
 public class BacktrackKnightRandom extends BacktrackKnight {
 
-    BacktrackKnightRandom(int[] boardDimension, int[] startPosition) {
+    public BacktrackKnightRandom(int[] boardDimension, int[] startPosition) {
         super(boardDimension, startPosition);
         }
 
