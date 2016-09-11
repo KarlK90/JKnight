@@ -1,4 +1,6 @@
-package KarlK90.JKnight;
+package KarlK90.JKnight.Helpers;
+
+import KarlK90.JKnight.Knights.Result;
 
 import java.util.Arrays;
 
@@ -16,36 +18,43 @@ public class BoardPrinter {
 
     private static final int THRESHOLD = 10000; // Threshold for switching from ms to s
 
-    public BoardPrinter(String method, int[] startPosition, int[] boardDimension, BoardStopWatch watch) {
-        setup(method, startPosition, boardDimension, watch);
+    private String method, message, columnString;
+    private int[] startPosition;
+    private int[] boardDimension;
+    private BoardStopWatch watch;
+
+    public synchronized void printResult(Result result){
+        setup(result.method, result.startPosition, result.boardDimension, result.watch);
+        if (result.solution){
+            printSolutionFound(result.chessboard);
+        }else {
+            printNoSolutionFound();
+        }
     }
 
-    String method, message, columnString;
-    int[] startPosition;
-    int[] boardDimension;
-    BoardStopWatch watch;
-
-    public void print(BoardPrinter printer) {
-        System.out.println(printer.message + "\n");
-    }
-
-    public void printSolutionFound(int[][] board) {
+    private void printSolutionFound(int[][] board) {
         print(newMessage().solutionFound().method().startPosition().board());
         printBoard(board);
         print(newMessage().runtime());
     }
 
-    public void printNoSolutionFound() {
+    private void printNoSolutionFound(){
         print(newMessage().noSolutionFound().method().badStartPosition().board());
         print(newMessage().runtime());
     }
 
-    public void setup(String method, int[] startPosition, int[] boardDimension, BoardStopWatch watch) {
+    private void setup(String method, int[] startPosition, int[] boardDimension, BoardStopWatch watch) {
         this.method = method;
         this.startPosition = startPosition;
         this.watch = watch;
         this.boardDimension = boardDimension;
         this.columnString = CalculateColumnString(boardDimension[0]*boardDimension[1]);
+    }
+
+    private void print(BoardPrinter printer) {
+        synchronized (System.out) {
+            System.out.println(printer.message + "\n");
+        }
     }
 
     private BoardPrinter runtime() {
@@ -62,6 +71,7 @@ public class BoardPrinter {
     }
 
     private void printBoard(int[][] board) {
+       synchronized (System.out) {
         System.out.print(ANSI_PURPLE);
         for (int[] row : board) {
             for (int column : row) {
@@ -71,6 +81,7 @@ public class BoardPrinter {
             System.out.println();
         }
         System.out.println(ANSI_WHITE);
+       }
     }
 
     private BoardPrinter solutionFound() {
@@ -107,5 +118,4 @@ public class BoardPrinter {
         message = "";
         return this;
     }
-
 }

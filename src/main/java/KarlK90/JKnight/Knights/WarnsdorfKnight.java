@@ -1,18 +1,14 @@
 package KarlK90.JKnight.Knights;
 
-import KarlK90.JKnight.NoSolutionException;
+import KarlK90.JKnight.Exceptions.NoSolutionException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class WarnsdorfKnight extends BacktrackKnight{
-    public WarnsdorfKnight(int[] boardDimension, int[] startPosition) {
-        super(boardDimension, startPosition);
-    }
 
     protected static final int OFFSET = 1; // Neighbors offset
-
-    protected String METHOD = "Warnsdorf Rule";
     private int[][][] path; // [][0][0] = x, [][0][1] = y, [][1-7][0] = Jump Matrix Index, [][1-7][1] = Successor Count
+    private final String METHOD = "Warnsdorf Rule";
 
     @Override
     protected String getMethod(){
@@ -95,6 +91,5 @@ public class WarnsdorfKnight extends BacktrackKnight{
         path[jump][0][1] = startPosition[1];
         chessboard[startPosition[0]][startPosition[1]] = 0;
         watch.reset();
-        printer.setup(getMethod(),startPosition,boardDimension,watch);
     }
 }

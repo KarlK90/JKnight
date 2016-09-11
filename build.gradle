@@ -1,0 +1,22 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'application'
+
+mainClassName = 'KarlK90.JKnight.JKnight'
+
+sourceCompatibility = 1.8
+version = '0.1'
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'JKnight',
+                'Implementation-Version': version
+    }
+}
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile "com.beust:jcommander:1.48"
+}
