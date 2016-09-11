@@ -1,4 +1,4 @@
-package KarlK90.JKnight;
+package KarlK90.JKnight.Helpers;
 
 public class BoardStopWatch {
 

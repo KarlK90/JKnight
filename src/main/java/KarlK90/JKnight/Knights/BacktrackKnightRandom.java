@@ -2,16 +2,7 @@ package KarlK90.JKnight.Knights;
 
 public class BacktrackKnightRandom extends BacktrackKnight {
 
-    public BacktrackKnightRandom(int[] boardDimension, int[] startPosition) {
-        super(boardDimension, startPosition);
-        }
-
-    protected String METHOD = "Backtracking - Random Jump Decision";
-
-    @Override
-    protected String getMethod(){
-        return this.METHOD;
-    }
+    private final String METHOD = "Backtracking - Random Jump Decision";
 
     @Override
     protected void jumpForward() {

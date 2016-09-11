@@ -1,35 +1,16 @@
 package KarlK90.JKnight.Knights;
 
-import KarlK90.JKnight.BoardPrinter;
-import KarlK90.JKnight.BoardStopWatch;
-import KarlK90.JKnight.NoSolutionException;
+import KarlK90.JKnight.Exceptions.NoSolutionException;
+import KarlK90.JKnight.Helpers.ICallableListener;
 
 import java.util.Arrays;
-import java.util.Random;
-
 
 public class BacktrackKnight extends BaseKnight {
 
-    public BacktrackKnight(int[] boardDimension, int[] startPosition) {
-        setup(boardDimension, startPosition);
-    }
+    private final String METHOD = "Backtracking";
 
-    protected int jump, fieldCount;
-    protected int[] boardDimension = new int[2];
-    protected int[][] chessboard;
-    protected int[][] path; // [0] = x, [1] = y, [2-9] = Neighbors
-
-    protected static final int OFFSET = 2; // Neighbors offset
-    protected String METHOD = "Backtracking";
-
-    protected BoardPrinter printer;
-    protected Random generator = new Random();
-    protected BoardStopWatch watch = new BoardStopWatch();
-
-    @Override
-    protected String getMethod(){
-        return this.METHOD;
-    }
+    int[][] path; // [0] = x, [1] = y, [2-9] = Neighbors
+    static final int OFFSET = 2; // Neighbors offset
 
     @Override
     public void reset(int[] startPosition) {
@@ -42,35 +23,39 @@ public class BacktrackKnight extends BaseKnight {
         path[jump][1] = startPosition[1];
         chessboard[startPosition[0]][startPosition[1]] = 0;
         watch.reset();
-        printer.setup(getMethod(),startPosition,boardDimension,watch);
     }
 
     @Override
-    public void run() {
-        solve();
+    public Result get() {
+        Result result = solve();
+        listener.callableFinished();
+        return result;
     }
 
     @Override
-    public void solve() {
+    public Result solve() {
+        boolean solved = false;
         try {
             watch.start();
             while (jump != fieldCount - 1) {
                 nextJump();
             }
             watch.stop();
-            printResult();
+            solved = true;
         } catch (NoSolutionException e) {
             watch.stop();
-            printNoResult();
+            solved = false;
         }
+        return new Result(solved,METHOD,startPosition,chessboard,watch);
     }
 
     @Override
-    public void setup(int[] boardDimension, int[] startPosition) {
+    public void setup(int[] boardDimension, int[] startPosition, ICallableListener context) {
+        listener = context;
         fieldCount = boardDimension[0] * boardDimension[1];
+        this.startPosition = startPosition;
         this.boardDimension = boardDimension;
         chessboard = new int[boardDimension[0]][boardDimension[1]];
-        this.printer = new BoardPrinter(METHOD,startPosition,boardDimension,watch);
         reset(startPosition);
     }
 
@@ -138,11 +123,4 @@ public class BacktrackKnight extends BaseKnight {
         }
     }
 
-    protected void printResult() {
-        printer.printSolutionFound(this.chessboard);
-    }
-
-    protected void printNoResult(){
-        printer.printNoSolutionFound();
-    }
 }
