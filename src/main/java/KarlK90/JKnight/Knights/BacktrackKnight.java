@@ -1,126 +1,72 @@
 package KarlK90.JKnight.Knights;
 
-import KarlK90.JKnight.Exceptions.NoSolutionException;
-
-import java.util.Arrays;
+import KarlK90.JKnight.Models.BacktrackNode;
+import KarlK90.JKnight.Models.Point;
 
 public class BacktrackKnight extends BaseKnight {
 
-    private final String METHOD = "Backtracking";
-
-    int[][] path; // [0] = x, [1] = y, [2-9] = Neighbors
-    static final int OFFSET = 2; // Neighbors offset
+    private final String METHOD = "Backtracking Optimized";
+    private BacktrackNode[] path;
 
     @Override
-    public void reset(int[] startPosition) {
-        for (int[] row : chessboard) {
-            Arrays.fill(row, UNVISITED);
-        }
-        jump = 0;
-        path = new int[fieldCount][10];
-        path[jump][0] = startPosition[0];
-        path[jump][1] = startPosition[1];
-        chessboard[startPosition[0]][startPosition[1]] = 0;
-        watch.reset();
-    }
-
-    @Override
-    public Result get() {
-        return solve();
-    }
-
-    @Override
-    public Result solve() {
-        boolean solved;
-        try {
-            watch.start();
-            while (jump != fieldCount - 1) {
-                nextJump();
-            }
-            watch.stop();
-            solved = true;
-        } catch (NoSolutionException e) {
-            watch.stop();
-            solved = false;
-        }
-        return new Result(solved, getMethod(), startPosition,boardDimension,chessboard,watch);
-    }
-
-    @Override
-    public void setup(int[] boardDimension, int[] startPosition) {
-        fieldCount = boardDimension[0] * boardDimension[1];
-        this.startPosition = startPosition;
-        this.boardDimension = boardDimension;
-        chessboard = new int[boardDimension[0]][boardDimension[1]];
-        reset(startPosition);
-    }
-
-    @Override
-    protected String getMethod(){
+    protected String getMethod() {
         return this.METHOD;
     }
 
-    protected int checkNextJump(int number) {
-        int[] nextJump = new int[2];
-        nextJump[0] = path[jump][0] + jumpMatrix[0][number];
-        nextJump[1] = path[jump][1] + jumpMatrix[1][number];
-
-        if (isLegalJump(nextJump,chessboard)) {
-            return VALID;
-        } else {
-            return INVALID;
+    @Override
+    protected void setup(Point boardDimension, Point startPosition) {
+        super.setup(boardDimension, startPosition);
+        path = new BacktrackNode[fieldCount];
+        for (int i = 0; i < fieldCount; i++) {
+            path[i] = new BacktrackNode();
+            path[i].Position = new Point();
+            path[i].Neighbor = new int[8];
         }
+
+        path[jump].Position = getStartPositionWithMarginApplied(startPosition);
     }
 
-    protected boolean currentNodeHasOnlyInvalidJumps() {
-        for (int i = 0; i < 8; i++) {
-            if (path[jump][i + OFFSET] == VALID) return false;
-        }
-        return true;
-    }
+    protected State jumpBack() {
+        chessboard[path[jump].Position.x][path[jump].Position.y] = UNVISITED;
 
-    protected void jumpBack() throws NoSolutionException {
-        chessboard[path[jump][0]][path[jump][1]] = UNVISITED;
-
-        if (--jump < 0) throw new NoSolutionException();
+        if (--jump < 0) return State.NoSolution;
 
         for (int i = 0; i < 8; i++) {
-            if (path[jump][i + OFFSET] == VISITED) {
-                path[jump][i + OFFSET] = DEADEND;
+            if (path[jump].Neighbor[i] == VISITED) {
+                path[jump].Neighbor[i] = DEADEND;
             }
         }
+
+        return State.Running;
     }
 
-    protected void jumpForward() {
-        for (int i = 0; i < 8; i++) {
-            if (path[jump][i + OFFSET] != INVALID && path[jump][i + OFFSET] != DEADEND) {
-                path[jump][i + OFFSET] = VISITED;
-                jump++;
-                path[jump][0] = path[jump - 1][0] + jumpMatrix[0][i];
-                path[jump][1] = path[jump - 1][1] + jumpMatrix[1][i];
+    protected State jumpForward(Point position) {
+        jump++;
+        path[jump].Position = position;
+        for (int i = 0; i < path[jump].Neighbor.length; i++) {
+            path[jump].Neighbor[i] = 0;
+        }
+        chessboard[position.x][position.y] = jump;
+        return State.Running;
+    }
 
-                for (int x = 0; x < 8; x++) {
-                    path[jump][x + OFFSET] = 0;
-                }
-                chessboard[path[jump][0]][path[jump][1]] = jump;
-                break;
+    protected State nextJump() {
+        Point currentJump = new Point();
+        int status;
+        for (int i = 0; i < 8; i++) {
+            status = path[jump].Neighbor[i];
+            if (status == INVALID || status == DEADEND) continue;
+
+            currentJump.x = path[jump].Position.x + jumpMatrix[0][i];
+            currentJump.y = path[jump].Position.y + jumpMatrix[1][i];
+
+            if (chessboard[currentJump.x][currentJump.y] == UNVISITED) {
+                path[jump].Neighbor[i] = VISITED;
+                return jumpForward(currentJump);
             }
         }
+
+        return jumpBack();
     }
 
-    protected void nextJump() throws NoSolutionException {
-        for (int i = 0; i < 8; i++) {
-            int temp = checkNextJump(i);
-            if (temp == VALID && path[jump][i + OFFSET] != DEADEND) {
-                path[jump][i + OFFSET] = VALID;
-            } else if (temp == INVALID && path[jump][i + OFFSET] != DEADEND) {
-                path[jump][i + OFFSET] = INVALID;
-            }
-        }
-        if (currentNodeHasOnlyInvalidJumps()) {
-            jumpBack();
-        } else {
-            jumpForward();
-        }
-    }
 }

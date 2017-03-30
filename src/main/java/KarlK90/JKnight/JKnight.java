@@ -1,52 +1,24 @@
 package KarlK90.JKnight;
 
-import KarlK90.JKnight.Helpers.BoardPrinter;
-import KarlK90.JKnight.Helpers.KnightBuilder;
-import KarlK90.JKnight.Knights.Result;
+import KarlK90.JKnight.Helper.BoardPrinter;
+import KarlK90.JKnight.Knights.KnightBuilder;
 import com.beust.jcommander.JCommander;
-import com.beust.jcommander.Parameter;
 
-import java.util.List;
-import java.util.Random;
 import java.util.concurrent.*;
-import java.util.function.Supplier;
 
-import static KarlK90.JKnight.Helpers.BoardPrinter.*;
+import static KarlK90.JKnight.Helper.BoardPrinter.*;
 
 public class JKnight {
-
-    @Parameter(names = {"--threads"}, description = "Number of knights and threads", required = false)
-    private int threads = 1;
-
-    @Parameter(names = {"--board"}, arity = 2, description = "Rows and columns of the board: e.g. --board 8 8", required = true)
-    private List<String> sBoardDimension;
-    private int[] boardDimension;
-
-    @Parameter(names = {"--start"}, arity = 2, description = "Start position of the knight: e.g. --start 4 4", required = false)
-    private List<String> sStartPosition;
-    private int[] startPosition;
-
-    @Parameter(names = {"--random-start"}, arity = 1, required = false, description = "Generates random start positions for each knight")
-    private boolean randomStart = true;
-
-    @Parameter(names = {"--solutions"}, description = "Number of attempted solutions, -1 = unlimited", required = false)
-    private int solutions = -1;
-    private boolean infiniteSolutions = true;
-
-    @Parameter(names = {"--method"}, description = "Solving algorithm: warnsdorf, backtracking, backtracking-random", required = true)
-    private String method;
-
-    @Parameter(names = "--help", description = "Display Help", help = true)
-    private boolean help;
-
-    private Random generator = new Random();
     private BoardPrinter printer = new BoardPrinter();
     private ExecutorService executor = Executors.newCachedThreadPool();
+    private JKnightSettings settings;
 
     public static void main(String[] args) {
         printMOTD();
         JKnight jKnight = new JKnight();
-        jKnight.init(args);
+        if (jKnight.init(args)){
+            jKnight.startThreads(jKnight.settings);
+        }
     }
 
     private static void printMOTD() {
@@ -60,11 +32,12 @@ public class JKnight {
                 "   \\/___/  \\/_/\\/_/\\/_/\\/_/\\/_/\\/___L\\ \\/_/\\/_/\\/__/\n" +
                 "                                 /\\____/            \n" +
                 "                                 \\_/__/             \n" + ANSI_RESET);
-        System.out.println("Version 0.1 - MIT License - Copyright (c) 2016 Stefan Kerkmann\n");
+        System.out.println("Version 0.2 - MIT License - Copyright (c) 2017 Stefan Kerkmann\n");
     }
 
-    private void init(String[] args) {
-        JCommander jCommander = new JCommander(this);
+    private boolean init(String[] args) {
+        settings = new JKnightSettings();
+        JCommander jCommander = new JCommander(settings);
         jCommander.setProgramName("JKnight");
 
         try {
@@ -72,78 +45,51 @@ public class JKnight {
         } catch (Exception e) {
             System.out.println(ANSI_RED + e.getMessage() + ANSI_RESET + "\n");
             jCommander.usage();
+            return false;
         }
 
-        if (help) {
+        if (settings.help) {
             jCommander.usage();
-        } else {
-            if (solutions > 0) infiniteSolutions = false;
-            parseListArguments();
-            startThreads();
+            return false;
         }
+
+        return true;
     }
 
-    private void startThreads() {
+    private void startThreads(JKnightSettings settings) {
         // if more threads then solutions are requested, only start as many threads as needed to fulfill request
-        threads = threads > solutions && !infiniteSolutions ? solutions : threads;
+        settings.threads = (settings.threads > settings.solutions && settings.solutions != -1) ? settings.solutions : settings.threads;
 
-        for (int i = 0; i < threads; i++) {
-            startKnight();
+        for (int i = 0; i < settings.threads; i++) {
+            startKnight(settings);
         }
     }
 
-    private void startKnight() {
-        CompletableFuture.supplyAsync(buildKnight(), executor)
+    private void startKnight(JKnightSettings settings) {
+        CompletableFuture.supplyAsync(KnightBuilder.Instance(settings).build(), executor)
                 .exceptionally(e -> {
-                    System.out.println("Exception occurred while solving!"+e.getLocalizedMessage());
+                    System.out.println("Exception occurred while solving!" + e.getLocalizedMessage());
+                    e.printStackTrace();
                     return null;
                 })
                 .thenAccept(result -> {
                     printer.printResult(result);
-                    if (infiniteSolutions) {
-                        startKnight();
+                    if (settings.solutions == -1) {
+                        startKnight(settings);
                     } else {
-                        if (solutions > 0 && result.solution) {
-                            solutions--;
-                            if (solutions + 1 > threads) {
-                                startKnight();
+                        if (settings.solutions > 0 && result.isSolution) {
+                            settings.solutions--;
+                            if (settings.solutions >= settings.threads) {
+                                startKnight(settings);
                             } else {
-                                threads--;
+                                settings.threads--;
                             }
                         }
-                        if (solutions > 0 && !result.solution) {
-                            startKnight();
+                        if (settings.solutions > 0 && !result.isSolution) {
+                            startKnight(settings);
                         }
-                        if (solutions <= 0) executor.shutdown();
+                        if (settings.solutions <= 0) executor.shutdown();
                     }
                 });
-    }
-
-    private Supplier<Result> buildKnight() {
-        return KnightBuilder.newFutureKnight(KnightBuilder.convert(method), boardDimension, getNewStartPosition());
-    }
-
-    private int[] getNewStartPosition() {
-        if (randomStart && startPosition == null) {
-            return new int[]{generator.nextInt(boardDimension[0]), generator.nextInt(boardDimension[1])};
-        } else {
-            return startPosition;
-        }
-    }
-
-    private void parseListArguments() {
-        startPosition = parseToIntArray(sStartPosition);
-        boardDimension = parseToIntArray(sBoardDimension);
-    }
-
-    private int[] parseToIntArray(final List<String> stringList) {
-        if (stringList != null) {
-            int[] intArray = new int[stringList.size()];
-            for (int i = 0; i < stringList.size(); i++) {
-                intArray[i] = Integer.parseInt(stringList.get(i));
-            }
-            return intArray;
-        }
-        return null;
     }
 }

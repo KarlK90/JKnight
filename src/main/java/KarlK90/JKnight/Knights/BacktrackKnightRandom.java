@@ -1,30 +1,86 @@
 package KarlK90.JKnight.Knights;
 
-public class BacktrackKnightRandom extends BacktrackKnight {
+import KarlK90.JKnight.Models.BacktrackNode;
+import KarlK90.JKnight.Models.Point;
 
+public class BacktrackKnightRandom extends BaseKnight {
     private final String METHOD = "Backtracking - Random Jump Decision";
+    BacktrackNode[] path;
 
     @Override
-    protected String getMethod(){
+    protected void setup(Point boardDimension, Point startPosition){
+        super.setup(boardDimension, startPosition);
+        path = new BacktrackNode[fieldCount];
+        for (int i = 0; i < fieldCount; i++) {
+            path[i] = new BacktrackNode();
+            path[i].Position = new Point();
+            path[i].Neighbor = new int[8];
+        }
+
+        path[jump].Position = getStartPositionWithMarginApplied(startPosition);
+    }
+
+    @Override
+    protected String getMethod() {
         return this.METHOD;
     }
 
     @Override
-    protected void jumpForward() {
+    protected State nextJump() {
+        boolean hasValidJumps = false;
+        boolean validJumpFound;
+        for (int i = 0; i < 8; i++) {
+            int status = path[jump].Neighbor[i];
+            if (status == INVALID || status == DEADEND) continue;
+
+            validJumpFound = chessboard[path[jump].Position.x + jumpMatrix[0][i]][path[jump].Position.y + jumpMatrix[1][i]] == UNVISITED;
+
+            if (validJumpFound) {
+                path[jump].Neighbor[i] = VALID;
+                hasValidJumps = true;
+            } else {
+                path[jump].Neighbor[i] = INVALID;
+            }
+        }
+
+        if (hasValidJumps) {
+            return jumpForward();
+        } else {
+            return jumpBack();
+        }
+    }
+
+
+    protected State jumpForward() {
         while (true) {
             int rnd = generator.nextInt(8);
-            if (path[jump][rnd + OFFSET] != INVALID && path[jump][rnd + OFFSET] != DEADEND) {
-                path[jump][rnd + OFFSET] = VISITED;
-                jump++;
-                path[jump][0] = path[jump - 1][0] + jumpMatrix[0][rnd];
-                path[jump][1] = path[jump - 1][1] + jumpMatrix[1][rnd];
+            if (path[jump].Neighbor[rnd] == VALID) {
+                path[jump].Neighbor[rnd] = VISITED;
 
-                for (int x = 0; x < 8; x++) {
-                    path[jump][x + OFFSET] = 0;
+                jump++;
+                path[jump].Position = new Point(path[jump - 1].Position.x + jumpMatrix[0][rnd], path[jump - 1].Position.y + jumpMatrix[1][rnd]);
+                for (int i = 0; i < path[jump].Neighbor.length; i++) {
+                    path[jump].Neighbor[i] = 0;
                 }
-                chessboard[path[jump][0]][path[jump][1]] = jump;
+                chessboard[path[jump].Position.x][path[jump].Position.y] = jump;
                 break;
             }
         }
+
+        return State.Running;
+    }
+
+    protected State jumpBack() {
+        chessboard[path[jump].Position.x][path[jump].Position.y] = UNVISITED;
+
+        if (--jump < 0) return State.NoSolution;
+
+        for (int i = 0; i < 8; i++) {
+            if (path[jump].Neighbor[i] == VISITED) {
+                path[jump].Neighbor[i] = DEADEND;
+            }
+        }
+
+        return State.Running;
     }
 }
